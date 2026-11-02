@@ -1,0 +1,351 @@
+/* ============================================
+   抓小球小游戏 — 样式表
+   严格按 spec.md 视觉规格实现
+   ============================================ */
+
+/* ---------- 全局重置 ---------- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, sans-serif;
+  background-color: #FFF8DC;           /* 浅黄色 Wheat/Cornsilk */
+  color: #333;
+  min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent; /* 移动端去除点击高亮 */
+  user-select: none;                    /* 防止长按选中文字 */
+}
+
+/* ============================================
+   顶部状态栏 (AC: 半透明白色 + flex 横栏)
+   ============================================ */
+#status-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 100;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.status-left,
+.status-center,
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+}
+
+.status-center {
+  justify-content: center;
+}
+
+.status-right {
+  justify-content: flex-end;
+}
+
+.status-bar .label,
+.label {
+  font-size: 14px;
+  color: #888;
+}
+
+.status-bar .value,
+.value {
+  font-weight: 700;
+}
+
+#score-value {
+  font-size: 20px;
+  color: #2c5aa0;
+  min-width: 40px;
+  text-align: left;
+  transition: transform 0.15s ease;
+}
+
+#timer-value {
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;   /* 等宽数字，倒计时不跳动 */
+}
+
+/* 倒计时警示色 */
+.timer-normal {
+  color: #333;
+}
+
+.timer-warning {
+  color: #e74c3c;
+  animation: timer-pulse 0.6s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.7; transform: scale(1.05); }
+}
+
+/* 分数变化弹跳动画 */
+.score-pop {
+  animation: score-pop 0.25s ease-out;
+}
+
+@keyframes score-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.3); color: #e67e22; }
+  100% { transform: scale(1); color: #2c5aa0; }
+}
+
+/* ---------- 游戏按钮 ---------- */
+.game-btn {
+  padding: 10px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #4A90E2;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.35);
+}
+
+.game-btn:hover {
+  background-color: #3a7bc8;
+}
+
+.game-btn:active {
+  transform: scale(0.96);
+}
+
+/* ============================================
+   游戏主区域
+   ============================================ */
+#game-area {
+  position: fixed;
+  top: 60px;          /* 状态栏高度 */
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 60px);
+  height: calc(100dvh - 60px);
+  cursor: crosshair;
+}
+
+/* 独立的小球容器（关键：避免 innerHTML='' 误伤 UI 层） */
+#ball-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;  /* 让点击穿透到 game-area，小球自身重设为 auto */
+}
+
+/* ---------- 扣分闪红反馈 ---------- */
+#game-area.flash-miss {
+  animation: flash-red 0.15s ease-out;
+}
+
+@keyframes flash-red {
+  0%   { background-color: rgba(231, 76, 60, 0.25); }
+  100% { background-color: transparent; }
+}
+
+/* ============================================
+   蓝色小球
+   ============================================ */
+.ball {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%,
+              #7ab8f0 0%,    /* 高光 */
+              #4A90E2 50%,   /* 主色 */
+              #2c5aa0 100%); /* 阴影 */
+  box-shadow: 0 4px 12px rgba(44, 90, 160, 0.4),
+              inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  pointer-events: auto;  /* 覆盖 ball-layer 的 none，让小球可点击 */
+  will-change: transform, opacity;
+}
+
+/* 小球出现动画 */
+.ball-appear {
+  animation: ball-appear 0.2s ease-out forwards;
+}
+
+@keyframes ball-appear {
+  0%   { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 小球消失动画 */
+.ball-disappear {
+  animation: ball-disappear 0.15s ease-in forwards;
+  pointer-events: none;  /* 消失过程中不再可点 */
+}
+
+@keyframes ball-disappear {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* ============================================
+   初始提示层
+   ============================================ */
+.hint-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #666;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.hint-overlay p {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.hint-overlay .hint-sub {
+  font-size: 16px;
+  color: #888;
+}
+
+.hint-overlay b {
+  color: #e67e22;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============================================
+   游戏结束弹窗
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  opacity: 1;
+  animation: modal-fade-in 0.3s ease-out;
+}
+
+.modal-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes modal-fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.modal-card {
+  background-color: #fff;
+  padding: 40px 48px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  animation: modal-pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modal-pop-in {
+  0%   { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+.modal-card h2 {
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.final-score {
+  font-size: 14px;
+  color: #999;
+  margin-top: 20px;
+  margin-bottom: 4px;
+}
+
+.final-score-number {
+  font-size: 64px;
+  font-weight: 800;
+  color: #4A90E2;
+  margin-bottom: 24px;
+  line-height: 1;
+}
+
+/* ============================================
+   移动端响应式适配
+   ============================================ */
+@media (max-width: 480px) {
+  #status-bar {
+    padding: 0 12px;
+    height: 56px;
+  }
+
+  .status-left,
+  .status-center,
+  .status-right {
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  #score-value {
+    font-size: 18px;
+  }
+
+  #timer-value {
+    font-size: 20px;
+  }
+
+  .game-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .modal-card {
+    padding: 32px 28px;
+  }
+
+  .modal-card h2 {
+    font-size: 22px;
+  }
+
+  .final-score-number {
+    font-size: 48px;
+  }
+}
