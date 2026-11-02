@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新闻排行榜 - 张博鑫 24001010910</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", "SimSun", Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 10px;
+      min-height: 100vh;
+    }
+
+    .student-info {
+      width: 360px;
+      background: #fff;
+      border: 1px solid #dcdcdc;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #666;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .student-info b {
+      color: #333;
+    }
+
+    /* 排行榜整体容器 */
+    .rank-box {
+      width: 360px;
+      background: #fff;
+      border: 1px solid #dcdcdc;
+      border-top: none;
+      margin-bottom: 16px;
+    }
+
+    /* 标签页头部 */
+    .rank-tabs {
+      display: flex;
+      border-bottom: 2px solid #4a90d9;
+    }
+
+    .rank-tab {
+      flex: 1;
+      text-align: center;
+      padding: 9px 0;
+      font-size: 15px;
+      font-weight: bold;
+      color: #4a90d9;
+      background: #eaf2fb;
+      border: none;
+      border-right: 1px solid #dcdcdc;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .rank-tab:last-child {
+      border-right: none;
+    }
+
+    .rank-tab.active {
+      background: #ffffff;
+      color: #333;
+      border-bottom: 2px solid #ffffff;
+      margin-bottom: -2px;
+    }
+
+    /* 列表区域 */
+    .rank-list {
+      list-style: none;
+      padding: 6px 0;
+    }
+
+    .rank-list li {
+      display: flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-bottom: 1px dashed #eee;
+      font-size: 13px;
+    }
+
+    .rank-list li:last-child {
+      border-bottom: none;
+    }
+
+    .rank-list li:hover {
+      background: #f4f8fd;
+    }
+
+    /* 序号 */
+    .rank-num {
+      width: 26px;
+      color: #999;
+      font-weight: bold;
+      font-style: italic;
+      flex-shrink: 0;
+    }
+
+    /* 前三名序号标红 */
+    .rank-num.top {
+      color: #d43c33;
+    }
+
+    /* 标题 */
+    .rank-title {
+      flex: 1;
+      color: #333;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 8px;
+    }
+
+    .rank-title:hover {
+      color: #4a90d9;
+      text-decoration: underline;
+    }
+
+    /* 阅读量/评论量 */
+    .rank-count {
+      color: #c00;
+      flex-shrink: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    /* 页脚 */
+    .page-footer {
+      width: 360px;
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      padding-top: 10px;
+      border-top: 1px solid #e5e5e5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 学生信息 -->
+  <div class="student-info">
+    <span>学号：<b>24001010910</b></span>
+    <span>姓名：<b>张博鑫</b></span>
+  </div>
+
+  <!-- 排行榜 -->
+  <div class="rank-box">
+    <div class="rank-tabs">
+      <button class="rank-tab active" data-tab="click">点击排行</button>
+      <button class="rank-tab" data-tab="comment">评论排行</button>
+    </div>
+
+    <ul class="rank-list" id="rank-list"></ul>
+  </div>
+
+  <div class="page-footer">网页设计课程作业 · 制作者：张博鑫（24001010910）</div>
+
+  <script>
+    // 点击排行数据
+    var clickData = [
+      { title: "中国各城市房子还要卖多少年（详细数据）", count: 167706 },
+      { title: "任志强：60多年来 我不知道国企给了我们什么", count: 171180 },
+      { title: "三精制药跳楼老总被查因半间闹房案 省台回应", count: 127631 },
+      { title: "内地17省铺开不动产统一登记职责整合工作", count: 113865 },
+      { title: "山西煤老板抛售整栋99套二手房 8年投资翻番", count: 72770 },
+      { title: "北京城南楼市\u201c沦陷\u201d 变相降价措施加码", count: 82971 },
+      { title: "中国3D打印技术取得重大突破 近1200人关注", count: 27456 },
+      { title: "重磅利空突袭全球股指 A股或黑周五无悬念", count: 25322 },
+      { title: "七匹狼早盘上演诡异一幕：单笔4手卖单刷屏", count: 20912 },
+      { title: "长油小股东东导股东大热点 当场爆粗口大骂", count: 11667 }
+    ];
+
+    // 评论排行数据
+    var commentData = [
+      { title: "专家建议：延迟退休应\u201c渐进式\u201d推进", count: 98231 },
+      { title: "多地出台新政鼓励大学生创业 可保留学籍", count: 87654 },
+      { title: "一线城市房价连续三月环比上涨引热议", count: 76420 },
+      { title: "高铁票价新机制发布 部分线路票价浮动", count: 65310 },
+      { title: "网络直播新规实施 主播需实名登记", count: 54207 },
+      { title: "新能源汽车销量创新高 充电桩建设提速", count: 43815 },
+      { title: "高校毕业生人数再创新高 就业形势分析", count: 37692 },
+      { title: "共享单车新规出台 押金管理更加规范", count: 28450 },
+      { title: "多地试点\u201c2.5天小长假\u201d 引发网友热议", count: 19873 },
+      { title: "人工智能产业发展报告发布 人才缺口大", count: 12680 }
+    ];
+
+    var dataList = { click: clickData, comment: commentData };
+
+    // 渲染列表
+    function renderList(tab) {
+      var list = document.getElementById('rank-list');
+      var html = '';
+      for (var i = 0; i < dataList[tab].length; i++) {
+        var item = dataList[tab][i];
+        var numClass = i < 3 ? 'rank-num top' : 'rank-num';
+        html += '<li>'
+              +   '<span class="' + numClass + '">' + (i + 1) + '</span>'
+              +   '<a href="javascript:void(0);" class="rank-title">' + item.title + '</a>'
+              +   '<span class="rank-count">' + item.count + '</span>'
+              + '</li>';
+      }
+      list.innerHTML = html;
+    }
+
+    // 标签切换
+    var tabs = document.querySelectorAll('.rank-tab');
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].addEventListener('click', function () {
+        document.querySelector('.rank-tab.active').classList.remove('active');
+        this.classList.add('active');
+        renderList(this.getAttribute('data-tab'));
+      });
+    }
+
+    // 默认显示点击排行
+    renderList('click');
+  </script>
+</body>
+</html>
